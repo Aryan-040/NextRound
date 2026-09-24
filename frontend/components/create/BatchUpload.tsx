@@ -533,8 +533,6 @@ function BatchSummary({ succeeded, failed, total }: BatchSummaryProps) {
 export interface BatchUploadProps {
   /** Called once for each successfully created kit. */
   onKitCreated?: (kitId: string) => void;
-  /** Called when batch processing is complete. */
-  onComplete?: () => void;
 }
 
 /**
@@ -548,7 +546,7 @@ export interface BatchUploadProps {
  */
 type BatchPhase = 'idle' | 'preview' | 'processing' | 'done';
 
-export function BatchUpload({ onKitCreated, onComplete }: BatchUploadProps) {
+export function BatchUpload({ onKitCreated }: BatchUploadProps) {
   const [phase, setPhase] = useState<BatchPhase>('idle');
   const [parseError, setParseError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -725,7 +723,6 @@ export function BatchUpload({ onKitCreated, onComplete }: BatchUploadProps) {
 
     if (!cancelledRef.current) {
       setPhase('done');
-      onComplete?.();
     }
   };
 
@@ -749,37 +746,11 @@ export function BatchUpload({ onKitCreated, onComplete }: BatchUploadProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Schema hint with download template */}
+      {/* Schema hint — always visible */}
       <div className="rounded-md bg-bg-surface border border-bg-raised px-4 py-3">
-        <div className="flex items-start justify-between gap-4 mb-2">
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-medium text-text-secondary">
-              Expected file format
-            </p>
-            <a
-              href="https://github.com/Aryan-040/PrepKit/blob/main/docs/BATCH_UPLOAD.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-text-secondary hover:text-accent transition-colors"
-              title="View detailed documentation"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
-              </svg>
-            </a>
-          </div>
-          <a
-            href="/batch-template.json"
-            download="batch-template.json"
-            className="text-xs font-medium text-accent hover:text-accent/80 transition-colors flex items-center gap-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
-              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
-            </svg>
-            Download Template
-          </a>
-        </div>
+        <p className="text-xs font-medium text-text-secondary mb-1.5">
+          Expected file format
+        </p>
         <pre className="text-xs font-mono text-text-primary/80 whitespace-pre-wrap leading-relaxed">
           {`[
   {
@@ -790,12 +761,6 @@ export function BatchUpload({ onKitCreated, onComplete }: BatchUploadProps) {
   }
 ]`}
         </pre>
-        <p className="text-xs text-text-secondary mt-2">
-          Each object requires: <code className="text-accent bg-accent/10 px-1 rounded">id</code> (unique identifier), 
-          <code className="text-accent bg-accent/10 px-1 rounded ml-1">jd</code> (job description), 
-          <code className="text-accent bg-accent/10 px-1 rounded ml-1">company_url</code>, and 
-          <code className="text-accent bg-accent/10 px-1 rounded ml-1">days</code> (1-60).
-        </p>
       </div>
 
       {/* Phase: idle — show drop zone */}
