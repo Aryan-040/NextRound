@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 /**
  * useSSEProgress â€” Server-Sent Events hook for pipeline progress.
@@ -45,6 +45,7 @@ export interface StageEvent {
   stage: PipelineStage;
   status: StageStatus;
   message?: string;
+  error?: string;
   completedAt?: string;
 }
 
