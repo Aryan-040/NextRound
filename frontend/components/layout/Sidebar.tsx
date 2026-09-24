@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { removeToken } from '@/lib/auth';
@@ -18,11 +18,11 @@ function KitSectionNav({ kitId }: { kitId?: string }) {
   const pathname = usePathname();
   const topNav = [{ label: 'Dashboard', href: '/dashboard' }, { label: 'New kit', href: '/create' }];
   const kitSections = kitId ? [
-    { label: 'Brief',      href: `/kits/${kitId}#brief` },
-    { label: 'Questions',  href: `/kits/${kitId}#questions` },
+    { label: 'Brief', href: `/kits/${kitId}#brief` },
+    { label: 'Questions', href: `/kits/${kitId}#questions` },
     { label: 'Flashcards', href: `/kits/${kitId}#flashcards` },
-    { label: 'Schedule',   href: `/kits/${kitId}#schedule` },
-    { label: 'Practice',   href: `/kits/${kitId}/practice` },
+    { label: 'Schedule', href: `/kits/${kitId}#schedule` },
+    { label: 'Practice', href: `/kits/${kitId}/practice` },
   ] : [];
   const isActive = (href: string) => {
     if (href.includes('#')) return pathname.startsWith(href.split('#')[0]);

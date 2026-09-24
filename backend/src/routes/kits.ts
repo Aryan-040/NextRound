@@ -1,4 +1,4 @@
-﻿/**
+/**
  * kits.ts
  * Express router for kit management endpoints.
  *
@@ -98,72 +98,72 @@ const createKitSchema = z.object({
 // Questions and flashcards within arrays also carry optional fields so callers
 // can send only the changed subset.
 const requirementSchema = z.object({
-  id:       z.string(),
-  text:     z.string(),
-  kind:     z.enum(['technical', 'behavioural', 'domain']),
+  id: z.string(),
+  text: z.string(),
+  kind: z.enum(['technical', 'behavioural', 'domain']),
   priority: z.enum(['must', 'nice']),
 });
 
 const questionPatchSchema = z.object({
-  id:              z.string(),
+  id: z.string(),
   requirement_ids: z.array(z.string()).optional(),
-  category:        z.enum(['technical', 'behavioural', 'system-design', 'company-fit']).optional(),
-  prompt:          z.string().optional(),
-  answer_outline:  z.string().optional(),
-  difficulty:      z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
-  pinned:          z.boolean().optional(),
+  category: z.enum(['technical', 'behavioural', 'system-design', 'company-fit']).optional(),
+  prompt: z.string().optional(),
+  answer_outline: z.string().optional(),
+  difficulty: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
+  pinned: z.boolean().optional(),
 });
 
 const flashcardPatchSchema = z.object({
-  id:              z.string(),
-  front:           z.string().optional(),
-  back:            z.string().optional(),
+  id: z.string(),
+  front: z.string().optional(),
+  back: z.string().optional(),
   requirement_ids: z.array(z.string()).optional(),
-  pinned:          z.boolean().optional(),
+  pinned: z.boolean().optional(),
 });
 
 const patchKitSchema = z
   .object({
     source: z
       .object({
-        company:       z.string(),
-        company_url:   z.string(),
-        role:          z.string(),
-        location:      z.string(),
-        jd_chars:      z.number(),
+        company: z.string(),
+        company_url: z.string(),
+        role: z.string(),
+        location: z.string(),
+        jd_chars: z.number(),
         researched_at: z.string(),
-        pages_used:    z.array(z.string()),
+        pages_used: z.array(z.string()),
       })
       .partial()
       .optional(),
     company_brief: z
       .object({
-        summary:      z.string(),
+        summary: z.string(),
         what_they_do: z.string(),
-        sources:      z.array(z.string()),
+        sources: z.array(z.string()),
       })
       .partial()
       .optional(),
     role: z
       .object({
-        title:            z.string(),
-        seniority:        z.string(),
+        title: z.string(),
+        seniority: z.string(),
         responsibilities: z.array(z.string()),
-        requirements:     z.array(requirementSchema),
+        requirements: z.array(requirementSchema),
       })
       .partial()
       .optional(),
-    questions:  z.array(questionPatchSchema).optional(),
+    questions: z.array(questionPatchSchema).optional(),
     flashcards: z.array(flashcardPatchSchema).optional(),
     schedule: z
       .object({
         days_available: z.number(),
         days: z.array(
           z.object({
-            day:          z.number(),
-            focus:        z.string(),
+            day: z.number(),
+            focus: z.string(),
             question_ids: z.array(z.string()),
-            minutes:      z.number(),
+            minutes: z.number(),
           }),
         ),
       })
@@ -172,7 +172,7 @@ const patchKitSchema = z
     coverage: z
       .object({
         uncovered_requirement_ids: z.array(z.string()),
-        passes:                    z.number(),
+        passes: z.number(),
       })
       .partial()
       .optional(),
@@ -271,11 +271,11 @@ router.post(
           error: 'A kit for this job description and company URL already exists.',
           existingKit: dup
             ? {
-                id: dup._id.toString(),
-                role: dup.source?.role ?? '',
-                company: dup.source?.company ?? '',
-                createdAt: dup.createdAt,
-              }
+              id: dup._id.toString(),
+              role: dup.source?.role ?? '',
+              company: dup.source?.company ?? '',
+              createdAt: dup.createdAt,
+            }
             : null,
         });
         return;
@@ -456,22 +456,22 @@ router.patch(
           const existing = kit.questions.find(q => q.id === patchQ.id);
           if (existing) {
             if (patchQ.requirement_ids !== undefined) existing.requirement_ids = patchQ.requirement_ids;
-            if (patchQ.category        !== undefined) existing.category        = patchQ.category;
-            if (patchQ.prompt          !== undefined) existing.prompt          = patchQ.prompt;
-            if (patchQ.answer_outline  !== undefined) existing.answer_outline  = patchQ.answer_outline;
-            if (patchQ.difficulty      !== undefined) existing.difficulty      = patchQ.difficulty;
+            if (patchQ.category !== undefined) existing.category = patchQ.category;
+            if (patchQ.prompt !== undefined) existing.prompt = patchQ.prompt;
+            if (patchQ.answer_outline !== undefined) existing.answer_outline = patchQ.answer_outline;
+            if (patchQ.difficulty !== undefined) existing.difficulty = patchQ.difficulty;
             // Always pin an edited question (Requirement 11.2)
             existing.pinned = true;
           } else {
             // New question added by the user — insert with pinned=true
             kit.questions.push({
-              id:              patchQ.id,
+              id: patchQ.id,
               requirement_ids: patchQ.requirement_ids ?? [],
-              category:        patchQ.category ?? 'technical',
-              prompt:          patchQ.prompt ?? '',
-              answer_outline:  patchQ.answer_outline ?? '',
-              difficulty:      patchQ.difficulty ?? 1,
-              pinned:          true,
+              category: patchQ.category ?? 'technical',
+              prompt: patchQ.prompt ?? '',
+              answer_outline: patchQ.answer_outline ?? '',
+              difficulty: patchQ.difficulty ?? 1,
+              pinned: true,
             });
           }
         }
@@ -482,8 +482,8 @@ router.patch(
         for (const patchF of patch.flashcards) {
           const existing = kit.flashcards.find(f => f.id === patchF.id);
           if (existing) {
-            if (patchF.front           !== undefined) existing.front           = patchF.front;
-            if (patchF.back            !== undefined) existing.back            = patchF.back;
+            if (patchF.front !== undefined) existing.front = patchF.front;
+            if (patchF.back !== undefined) existing.back = patchF.back;
             if (patchF.requirement_ids !== undefined) existing.requirement_ids = patchF.requirement_ids;
             // Always pin an edited flashcard (Requirement 11.2)
             existing.pinned = true;
@@ -492,14 +492,14 @@ router.patch(
             // empty (user added a card but hasn't filled it in yet; saving an
             // empty card would fail Mongoose's required validator on front/back).
             const frontVal = patchF.front ?? '';
-            const backVal  = patchF.back  ?? '';
+            const backVal = patchF.back ?? '';
             if (frontVal.trim() === '' && backVal.trim() === '') continue;
             kit.flashcards.push({
-              id:              patchF.id,
-              front:           frontVal,
-              back:            backVal,
+              id: patchF.id,
+              front: frontVal,
+              back: backVal,
               requirement_ids: patchF.requirement_ids ?? [],
-              pinned:          true,
+              pinned: true,
             });
           }
         }
@@ -508,11 +508,11 @@ router.patch(
       // 5. Merge remaining top-level sections (source, company_brief, role,
       //    schedule, coverage). Object.assign does a shallow merge so only the
       //    provided fields overwrite — others are preserved.
-      if (patch.source)        Object.assign(kit.source,        patch.source);
+      if (patch.source) Object.assign(kit.source, patch.source);
       if (patch.company_brief) Object.assign(kit.company_brief, patch.company_brief);
-      if (patch.role)          Object.assign(kit.role,          patch.role);
-      if (patch.schedule)      Object.assign(kit.schedule,      patch.schedule);
-      if (patch.coverage)      Object.assign(kit.coverage,      patch.coverage);
+      if (patch.role) Object.assign(kit.role, patch.role);
+      if (patch.schedule) Object.assign(kit.schedule, patch.schedule);
+      if (patch.coverage) Object.assign(kit.coverage, patch.coverage);
 
       // 6. Persist and return the updated document
       await kit.save();
@@ -707,20 +707,20 @@ const regenerateBodySchema = z.object({
  * Map a `questions-*` section name to its `QuestionCategory` value.
  */
 const SECTION_TO_CATEGORY: Partial<Record<RegenerateSection, QuestionCategory>> = {
-  'questions-technical':     'technical',
-  'questions-behavioural':   'behavioural',
+  'questions-technical': 'technical',
+  'questions-behavioural': 'behavioural',
   'questions-system-design': 'system-design',
-  'questions-company-fit':   'company-fit',
+  'questions-company-fit': 'company-fit',
 };
 
 /**
  * Map a `questions-*` section name to its pipeline stage name for SSE events.
  */
 const SECTION_TO_STAGE: Partial<Record<RegenerateSection, StageEvent['stage']>> = {
-  'questions-technical':     'generate-questions-technical',
-  'questions-behavioural':   'generate-questions-behavioural',
+  'questions-technical': 'generate-questions-technical',
+  'questions-behavioural': 'generate-questions-behavioural',
   'questions-system-design': 'generate-questions-system-design',
-  'questions-company-fit':   'generate-questions-company-fit',
+  'questions-company-fit': 'generate-questions-company-fit',
 };
 
 /**
@@ -819,8 +819,8 @@ async function restoreSnapshot(
 ): Promise<void> {
   const field =
     section === 'company-brief' ? 'company_brief' :
-    section === 'schedule'      ? 'schedule'       :
-    section === 'flashcards'    ? 'flashcards'     : 'questions';
+      section === 'schedule' ? 'schedule' :
+        section === 'flashcards' ? 'flashcards' : 'questions';
 
   await KitModel.findByIdAndUpdate(kit._id, {
     $set: { [field]: snapshot, status: 'ready' },
@@ -909,11 +909,11 @@ async function regenerateSection(
       const briefCompanyName = kit.source.company && kit.source.company.length > 3
         ? kit.source.company
         : (() => {
-            try {
-              const u = new URL(kit.source.company_url ?? '');
-              return u.hostname.replace(/^www\d*\./i, '').split('.')[0] ?? kit.source.company;
-            } catch { return kit.source.company; }
-          })();
+          try {
+            const u = new URL(kit.source.company_url ?? '');
+            return u.hostname.replace(/^www\d*\./i, '').split('.')[0] ?? kit.source.company;
+          } catch { return kit.source.company; }
+        })();
 
       const newBrief = await generateCompanyBrief(
         llm,
@@ -946,7 +946,7 @@ async function regenerateSection(
         pinned: boolean;
       }>;
 
-      const pinnedFlashcards    = currentFlashcards.filter(f => f.pinned);
+      const pinnedFlashcards = currentFlashcards.filter(f => f.pinned);
       const nonPinnedFlashcards = currentFlashcards.filter(f => !f.pinned);
 
       // Compute ID offset so new IDs don't collide with existing ones.
@@ -982,7 +982,7 @@ async function regenerateSection(
 
     // ── Question-category regeneration ────────────────────────────────────
     const category = SECTION_TO_CATEGORY[section]!;
-    const stage    = SECTION_TO_STAGE[section]!;
+    const stage = SECTION_TO_STAGE[section]!;
 
     emit({ stage, status: 'running' });
 
@@ -997,9 +997,9 @@ async function regenerateSection(
       pinned: boolean;
     }>;
 
-    const pinnedInCategory    = currentQuestions.filter(q => q.category === category && q.pinned);
+    const pinnedInCategory = currentQuestions.filter(q => q.category === category && q.pinned);
     const nonPinnedInCategory = currentQuestions.filter(q => q.category === category && !q.pinned);
-    const otherQuestions      = currentQuestions.filter(q => q.category !== category);
+    const otherQuestions = currentQuestions.filter(q => q.category !== category);
 
     // How many new questions to request: fill remaining slots after pinned.
     const targetCount = Math.max(1, MAX_QUESTIONS_PER_CATEGORY - pinnedInCategory.length);
@@ -1073,7 +1073,7 @@ async function regenerateSection(
       await restoreSnapshot(kit, section, snapshot);
     } catch (restoreErr) {
       // If restore fails, at least reset the status so the kit isn't stuck as 'generating'.
-      await KitModel.updateOne({ _id: kit._id }, { $set: { status: 'ready' } }).catch(() => {});
+      await KitModel.updateOne({ _id: kit._id }, { $set: { status: 'ready' } }).catch(() => { });
       console.error(`[kits] Failed to restore snapshot for kit ${kitId}:`, restoreErr);
     }
 
@@ -1082,10 +1082,10 @@ async function regenerateSection(
       section === 'schedule'
         ? 'schedule'
         : section === 'company-brief'
-        ? 'company-brief'
-        : section === 'flashcards'
-        ? 'generate-flashcards'
-        : (SECTION_TO_STAGE[section] ?? 'pipeline');
+          ? 'company-brief'
+          : section === 'flashcards'
+            ? 'generate-flashcards'
+            : (SECTION_TO_STAGE[section] ?? 'pipeline');
 
     pipelineEmitter.emitStage(kitId, { stage: failedStage, status: 'failed', error: message });
     pipelineEmitter.emitStage(kitId, {
