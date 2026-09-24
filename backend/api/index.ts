@@ -10,11 +10,24 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 let isConnected = false;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Log incoming request for debugging
+  console.log('[vercel] Incoming request:', {
+    method: req.method,
+    url: req.url,
+    path: req.url,
+    headers: {
+      origin: req.headers.origin,
+      host: req.headers.host,
+    },
+  });
+
   try {
     // Connect to MongoDB once — reused across warm invocations
     if (!isConnected) {
+      console.log('[vercel] Connecting to MongoDB...');
       await connectDB();
       isConnected = true;
+      console.log('[vercel] MongoDB connected');
     }
 
     // Delegate to the Express app

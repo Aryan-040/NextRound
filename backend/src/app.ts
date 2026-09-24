@@ -31,6 +31,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Backend is running' });
+});
+
 app.use('/api/auth', authRouter);
 app.use('/api/kits', kitsRouter);
 // Practice routes are nested under /api/kits/:id/practice — the router uses
