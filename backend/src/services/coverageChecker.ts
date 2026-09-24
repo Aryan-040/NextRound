@@ -1,4 +1,4 @@
-import type { Requirement, Question } from '@interview-prep/shared';
+import type { Requirement, Question } from '../shared';
 
 /**
  * The result of a coverage check over a set of requirements and questions.

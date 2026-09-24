@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { checkCoverage } from '../coverageChecker';
-import type { Requirement, Question } from '@interview-prep/shared';
+import type { Requirement, Question } from '../../shared';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -25,8 +25,8 @@
  */
 
 import { createHash } from 'crypto';
-import type { Kit, Requirement, Question, Flashcard } from '@interview-prep/shared';
-import { validateKit, isValidationError } from '@interview-prep/shared';
+import type { Kit, Requirement, Question, Flashcard } from '../shared';
+import { validateKit, isValidationError } from '../shared';
 import { CrawlerService } from './crawler';
 import type { CrawlerResult } from './crawler';
 import { createResearchAgent } from './researchAgent';

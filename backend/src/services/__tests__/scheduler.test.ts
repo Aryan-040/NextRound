@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildSchedule } from '../scheduler';
-import type { Question, Requirement } from '@interview-prep/shared';
+import type { Question, Requirement } from '../../shared';
 
 // ---------------------------------------------------------------------------
 // Helpers

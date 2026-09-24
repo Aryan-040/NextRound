@@ -1,4 +1,4 @@
-﻿import type { Question, Requirement, DayEntry } from '@interview-prep/shared';
+﻿import type { Question, Requirement, DayEntry } from '../shared';
 
 export interface Schedule {
   days_available: number;

@@ -11,7 +11,7 @@
  */
 
 import { Schema, model, Document, Types } from 'mongoose';
-import type { FlashcardProgressDocument, RatingEntry } from '@interview-prep/shared';
+import type { FlashcardProgressDocument, RatingEntry } from '../shared';
 
 // ---------------------------------------------------------------------------
 // FlashcardProgressModelDocument

@@ -12,7 +12,7 @@
  */
 
 import { Schema, model, Document, Types } from 'mongoose';
-import type { KitDocument } from '@interview-prep/shared';
+import type { KitDocument } from '../shared';
 
 // ---------------------------------------------------------------------------
 // KitModelDocument â€” merges the shared KitDocument type with Mongoose Document

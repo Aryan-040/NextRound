@@ -43,7 +43,7 @@ vi.mock('../../config', () => ({
 
 // ── 2. Build a minimal valid Kit (Appendix A shape) ───────────────────────────
 
-import type { Kit } from '@interview-prep/shared';
+import type { Kit } from '../../shared';
 
 const CANNED_KIT: Kit = {
   source: {

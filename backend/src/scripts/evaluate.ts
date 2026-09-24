@@ -18,7 +18,7 @@
 import { parseArgs } from 'node:util';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { runPipeline } from '../services/extractionPipeline';
-import type { Kit } from '@interview-prep/shared';
+import type { Kit } from '../shared';
 
 // ---------------------------------------------------------------------------
 // Types
