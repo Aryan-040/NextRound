@@ -23,10 +23,10 @@ export function LandingPage({ initialMode = 'register' }: { initialMode?: 'regis
       <header className="w-full max-w-7xl mx-auto px-6 sm:px-8 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-bg-base font-extrabold text-sm shadow-md shadow-accent/20">
-            N
+            P
           </div>
           <span className="font-bold text-xl tracking-tight text-text-primary font-sans">
-            NextRound
+            PrepKit
           </span>
           <span className="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/20 ml-1">
             AI Kit
@@ -78,12 +78,6 @@ export function LandingPage({ initialMode = 'register' }: { initialMode?: 'regis
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="w-full max-w-7xl mx-auto px-6 sm:px-8 py-6 text-center sm:flex sm:items-center sm:justify-between border-t border-bg-raised/30 text-xs text-text-secondary/60">
-        <p>© NextRound AI. All rights reserved.</p>
-        <p className="mt-2 sm:mt-0 font-mono text-[11px]">Next.js 14 • Express • Gemini/Groq LLM</p>
-      </footer>
     </main>
   );
 }

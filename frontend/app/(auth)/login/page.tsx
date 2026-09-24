@@ -1,7 +1,7 @@
 import { LandingPage } from '@/components/auth/LandingPage';
 
 export const metadata = {
-  title: 'Sign in — NextRound',
+  title: 'Sign in — PrepKit',
 };
 
 export default function LoginPage() {
