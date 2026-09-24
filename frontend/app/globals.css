@@ -1,0 +1,18 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+  body { background-color: #1E2130; color: #F0EDE6; font-family: 'DM Sans', sans-serif; line-height: 1.6; min-height: 100vh; }
+  h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+  a { color: #5B8EF0; text-decoration: none; }
+  a:hover { color: #7AAAF4; }
+  code, pre, kbd, samp { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+  ::selection { background-color: #2A4A8A; color: #F0EDE6; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #1E2130; }
+  ::-webkit-scrollbar-thumb { background: #313649; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #5B8EF0; }
+}
