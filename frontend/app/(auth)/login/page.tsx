@@ -1,13 +1,13 @@
-import { AuthForm } from '@/components/auth/AuthForm';
+import { LandingPage } from '@/components/auth/LandingPage';
 
 export const metadata = {
-  title: 'Sign in — PrepKit',
+  title: 'Sign in — NextRound',
 };
 
-/**
- * Login page — rendered inside the unauthenticated (auth) layout.
- * Delegates all form logic to the shared AuthForm component.
- */
 export default function LoginPage() {
-  return <AuthForm mode="login" />;
+  return <LandingPage initialMode="login" />;
 }
+
+
+
+
