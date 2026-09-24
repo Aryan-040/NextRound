@@ -1,0 +1,14 @@
+[
+  {
+    "id": "case-1",
+    "jd": "We are looking for a Senior Software Engineer to join our team. You will be responsible for designing and developing scalable web applications...",
+    "company_url": "https://example.com",
+    "days": 7
+  },
+  {
+    "id": "case-2",
+    "jd": "Backend Developer position - Node.js, Express, MongoDB...",
+    "company_url": "https://anothercompany.com",
+    "days": 5
+  }
+]
