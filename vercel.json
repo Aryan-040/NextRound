@@ -1,13 +1,10 @@
 {
   "version": 2,
+  "buildCommand": "cd packages/shared && npm run build && cd ../..",
   "builds": [
     {
       "src": "backend/api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "bundle": true,
-        "maxDuration": 30
-      }
+      "use": "@vercel/node"
     },
     {
       "src": "frontend/package.json",
