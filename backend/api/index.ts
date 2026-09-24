@@ -10,6 +10,17 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 let isConnected = false;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Set CORS headers for all requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   try {
     // Connect to MongoDB once (connection is reused across invocations)
     if (!isConnected) {
