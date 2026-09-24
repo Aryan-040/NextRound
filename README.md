@@ -33,6 +33,7 @@ Users can edit, reorder, add, delete, and regenerate any section inline without 
 | Property-based tests | `fast-check` | TypeScript-native PBT library; excellent for the deterministic scheduler and coverage checker |
 | Test runner | Vitest | ESM-native, fast, shares TypeScript config with the main codebase |
 | Monorepo | npm workspaces | Zero-config shared package resolution; no extra tooling needed |
+| Deployment | Vercel | Unified deployment platform for full-stack Next.js + Express API via serverless functions |
 
 ---
 
@@ -56,7 +57,7 @@ cd <repository-root>
 npm install
 ```
 
-This installs dependencies for all three workspaces (`frontend`, `backend`, `packages/shared`) in one step.
+This installs dependencies for the frontend and backend workspaces in one step.
 
 ### 2. Configure environment variables
 
@@ -95,15 +96,59 @@ The backend validates all required environment variables at startup and exits wi
 
 ### 4. Production deployment
 
-The application is designed to run as two separate services (frontend and backend) behind a reverse proxy or on a platform like Vercel (frontend) + Railway / Fly.io (backend).
+The application is designed to deploy as a unified full-stack application on **Vercel**:
 
-Set the same environment variables as above, plus:
+- **Frontend**: Next.js App Router deployed as a standard Vercel Next.js project
+- **Backend**: Express API deployed as Vercel serverless functions via `backend/api/index.ts`
+- **Routing**: `vercel.json` routes `/api/*` requests to the backend serverless function, all other requests to the Next.js frontend
 
-```dotenv
-NODE_ENV=production
-FRONTEND_URL=https://your-frontend-domain.com  # backend .env
-NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api  # frontend .env.local
+#### Vercel Configuration
+
+The `vercel.json` at the project root defines:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "backend/api/index.ts", "use": "@vercel/node" },
+    { "src": "frontend/package.json", "use": "@vercel/next" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "backend/api/index.ts" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "frontend/$1" }
+  ],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "/api"
+  }
+}
 ```
+
+This unified deployment means:
+- All API requests go to the same domain (no CORS issues)
+- Single Vercel project for both frontend and backend
+- Environment variables are managed through the Vercel dashboard
+
+#### Environment Variables for Production
+
+Configure these in the Vercel dashboard under **Settings → Environment Variables**:
+
+**Required:**
+```dotenv
+MONGODB_URI=<your MongoDB Atlas connection string>
+JWT_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))">
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=<your Gemini API key>
+NODE_ENV=production
+```
+
+**Optional:**
+```dotenv
+GROQ_API_KEY=<your Groq API key>  # if using LLM_PROVIDER=groq
+SERPAPI_KEY=<your SerpApi key>    # if using RESEARCH_PROVIDER=serpapi
+```
+
+The frontend automatically uses `/api` as the API URL in production (configured via `vercel.json` env).
 
 > **Note:** SSRF IP-range blocking (RFC 1918, loopback, link-local) is enabled only when `NODE_ENV=production`.
 
@@ -176,6 +221,14 @@ The batch runner processes cases sequentially. Five cases complete within 15 min
 
 ## Architecture
 
+### Shared Package Structure
+
+The shared types, validators, and serializers that define the Kit schema are located in `backend/src/shared/`. While the project uses npm workspaces, the shared code is **inlined directly into the backend source tree** rather than maintained as a separate workspace package.
+
+**Why inlined?** Vercel's serverless function build system cannot reliably resolve npm workspace dependencies (`@interview-prep/shared`) at runtime. By placing shared code directly in `backend/src/shared/`, it compiles as part of the standard backend TypeScript build and deploys without dependency resolution issues.
+
+The frontend does not import these types — it interacts with the backend solely through REST/SSE APIs with runtime validation, keeping the frontend loosely coupled to backend data structures.
+
 ### Monorepo structure
 
 ```
@@ -199,22 +252,22 @@ The batch runner processes cases sequentially. Five cases complete within 15 min
 │       ├── auth.ts          # localStorage JWT helpers
 │       └── sse.ts           # useSSEProgress hook (EventSource)
 │
-├── backend/                # Express 4 + TypeScript
-│   └── src/
-│       ├── routes/          # auth.ts, kits.ts, practice.ts
-│       ├── middleware/      # authenticate, ssrfGuard, sanitise, errorHandler
-│       ├── services/        # crawler, researchAgent, extractionPipeline,
-│       │                    # coverageChecker, scheduler, llmClient
-│       ├── models/          # User, Kit, FlashcardProgress (Mongoose)
-│       └── scripts/
-│           └── evaluate.ts  # CLI batch runner
-│
-└── packages/
-    └── shared/             # Published as @interview-prep/shared
-        └── src/
-            ├── types.ts     # Kit, Requirement, Question, Flashcard, etc.
-            ├── validator.ts # validateKit(obj) → Kit | ValidationError
-            └── serialiser.ts # serialiseKit(kit) → string
+└── backend/                # Express 4 + TypeScript
+    ├── api/
+    │   └── index.ts        # Vercel serverless entry point
+    └── src/
+        ├── routes/          # auth.ts, kits.ts, practice.ts
+        ├── middleware/      # authenticate, ssrfGuard, sanitise, errorHandler
+        ├── services/        # crawler, researchAgent, extractionPipeline,
+        │                    # coverageChecker, scheduler, llmClient
+        ├── models/          # User, Kit, FlashcardProgress (Mongoose)
+        ├── shared/          # Inlined shared types and validators
+        │   ├── types.ts     # Kit, Requirement, Question, Flashcard, etc.
+        │   ├── validator.ts # validateKit(obj) → Kit | ValidationError
+        │   ├── serialiser.ts # serialiseKit(kit) → string
+        │   └── index.ts     # Public API exports
+        └── scripts/
+            └── evaluate.ts  # CLI batch runner
 ```
 
 ### Request flow
@@ -227,7 +280,7 @@ Browser → Next.js (RSC / client component)
                                  → ExtractionPipeline → LLM
                                  → CoverageChecker (deterministic)
                                  → Scheduler (deterministic)
-                                 → validateKit (shared package)
+                                 → validateKit (backend/src/shared)
                                  → MongoDB (Mongoose)
        ← SSE stream (pipeline progress)
 ```
@@ -389,14 +442,11 @@ Sessions expire after 24 hours; users re-authenticate. This is a deliberate scop
 ## Running Tests
 
 ```bash
-# Run all test suites (shared package + backend)
+# Run all test suites
 npm test
 
 # Run only backend tests
 npm test --workspace=backend
-
-# Run only shared package tests
-npm test --workspace=packages/shared
 ```
 
 Tests are run with Vitest. The backend test suite covers:
