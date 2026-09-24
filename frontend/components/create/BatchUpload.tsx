@@ -737,6 +737,35 @@ export function BatchUpload({ onKitCreated }: BatchUploadProps) {
     cancelledRef.current = true;
   };
 
+  // ── Download template ──────────────────────────────────────────────────────
+
+  const handleDownloadTemplate = () => {
+    const template = [
+      {
+        id: 'case-1',
+        jd: 'Senior Software Engineer with 5+ years experience in TypeScript, React, and Node.js. Responsible for building scalable web applications, mentoring junior developers, and contributing to architectural decisions...',
+        company_url: 'https://example.com',
+        days: 7,
+      },
+      {
+        id: 'case-2',
+        jd: 'Product Manager role focusing on B2B SaaS products. Lead cross-functional teams, define product roadmap, conduct user research, and drive adoption metrics...',
+        company_url: 'https://another-company.com',
+        days: 14,
+      },
+    ];
+
+    const blob = new Blob([JSON.stringify(template, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'batch-template.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   // ── Derived summary counts (only meaningful in 'done' phase) ───────────────
 
   const succeeded = rows.filter((r) => r.status === 'ready').length;
@@ -746,11 +775,28 @@ export function BatchUpload({ onKitCreated }: BatchUploadProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Schema hint — always visible */}
+      {/* Schema hint with download button */}
       <div className="rounded-md bg-bg-surface border border-bg-raised px-4 py-3">
-        <p className="text-xs font-medium text-text-secondary mb-1.5">
-          Expected file format
-        </p>
+        <div className="flex items-center justify-between mb-1.5">
+          <p className="text-xs font-medium text-text-secondary">
+            Expected file format
+          </p>
+          <button
+            onClick={handleDownloadTemplate}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="w-3.5 h-3.5"
+            >
+              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+            </svg>
+            Download template
+          </button>
+        </div>
         <pre className="text-xs font-mono text-text-primary/80 whitespace-pre-wrap leading-relaxed">
           {`[
   {

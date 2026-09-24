@@ -3,6 +3,10 @@
 /**
  * Create Kit page — /create
  *
+ * Supports two modes:
+ *   'single' — Create one kit with form input
+ *   'batch'  — Upload JSON file with multiple job descriptions
+ *
  * Single-kit creation flow with two phases:
  *   'form'     — Show CreateForm. On successful POST → switch to 'progress'.
  *   'progress' — Show ProgressTracker (SSE). On completion → redirect to kit.
@@ -14,15 +18,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CreateForm } from '@/components/create/CreateForm';
 import { ProgressTracker } from '@/components/create/ProgressTracker';
+import { BatchUpload } from '@/components/create/BatchUpload';
 import { useSSEProgress } from '@/lib/sse';
 
+type Mode = 'single' | 'batch';
 type SinglePhase = 'form' | 'progress';
 
 export default function CreatePage() {
   const router = useRouter();
 
+  const [mode, setMode] = useState<Mode>('single');
   const [singlePhase, setSinglePhase] = useState<SinglePhase>('form');
-  const [kitId, setKitId]             = useState<string | null>(null);
+  const [kitId, setKitId] = useState<string | null>(null);
 
   // Open SSE stream only when in the 'progress' phase.
   const activeKitId = singlePhase === 'progress' ? kitId : null;
@@ -51,23 +58,55 @@ export default function CreatePage() {
           New prep kit
         </h1>
         <p className="text-sm text-text-secondary">
-          Paste a job description and company URL to generate your personalized interview prep kit.
+          {mode === 'single' 
+            ? 'Paste a job description and company URL to generate your personalized interview prep kit.'
+            : 'Upload a JSON file with multiple job descriptions to create several kits at once.'
+          }
         </p>
       </div>
 
-      {/* Single-kit creation flow */}
-      <div>
-        {singlePhase === 'form' && (
-          <CreateForm onKitCreated={handleKitCreated} />
-        )}
-        {singlePhase === 'progress' && (
-          <ProgressTracker
-            stages={stages}
-            pipelineStatus={status}
-            error={error}
-          />
-        )}
+      {/* Mode toggle */}
+      <div className="mb-6 inline-flex items-center gap-1 p-1 rounded-lg bg-bg-raised">
+        <button
+          onClick={() => setMode('single')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-150 ${
+            mode === 'single'
+              ? 'bg-bg-base text-text-primary shadow-sm'
+              : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          Single Kit
+        </button>
+        <button
+          onClick={() => setMode('batch')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-150 ${
+            mode === 'batch'
+              ? 'bg-bg-base text-text-primary shadow-sm'
+              : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          Batch Upload
+        </button>
       </div>
+
+      {/* Single-kit creation flow */}
+      {mode === 'single' && (
+        <div>
+          {singlePhase === 'form' && (
+            <CreateForm onKitCreated={handleKitCreated} />
+          )}
+          {singlePhase === 'progress' && (
+            <ProgressTracker
+              stages={stages}
+              pipelineStatus={status}
+              error={error}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Batch upload flow */}
+      {mode === 'batch' && <BatchUpload />}
     </div>
   );
 }
