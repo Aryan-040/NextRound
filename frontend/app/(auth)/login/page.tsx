@@ -1,5 +1,7 @@
 import { LandingPage } from '@/components/auth/LandingPage';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Sign in — PrepKit',
 };

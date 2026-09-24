@@ -1,0 +1,5 @@
+{
+  "framework": "nextjs",
+  "installCommand": "cd .. && npm install",
+  "buildCommand": "INIT_CWD=\"$PWD\" NODE_ENV=production next build"
+}

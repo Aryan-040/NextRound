@@ -1,4 +1,4 @@
 {
   "installCommand": "npm install",
-  "buildCommand": "npm run build --workspace=frontend"
+  "buildCommand": "cd frontend && INIT_CWD=\"$PWD\" NODE_ENV=production npx next build"
 }
