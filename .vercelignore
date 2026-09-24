@@ -1,0 +1,10 @@
+node_modules
+.git
+.next
+dist
+*.log
+.env
+.env.local
+*.test.ts
+__tests__
+coverage
