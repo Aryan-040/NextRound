@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { apiFetch, ApiError } from '@/lib/api';
 import { KitList } from '@/components/builder/KitList';
 import { Spinner } from '@/components/ui';
@@ -10,22 +10,41 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true); 
+  const fetchKits = useCallback(async () => {
+    try {
+      const data = await apiFetch<KitSummary[]>('/kits');
+      setKits(data);
       setError(null);
-      try {
-        const data = await apiFetch<KitSummary[]>('/kits');
-        if (!cancelled) setKits(data);
-      } catch (err) {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : 'Failed to load kits. Please refresh the page.');
-      } finally { 
-        if (!cancelled) setLoading(false); 
-      }
-    })();
-    return () => { cancelled = true; };
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to load kits. Please refresh the page.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchKits();
+  }, [fetchKits]);
+
+  // Poll for updates if there are any kits in 'generating' or 'pending' status
+  useEffect(() => {
+    const hasGeneratingKits = kits.some(kit => 
+      kit.status === 'generating' || kit.status === 'pending'
+    );
+
+    if (!hasGeneratingKits) return;
+
+    // Poll every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchKits();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [kits, fetchKits]);
+
+  const hasGeneratingKits = kits.some(kit => 
+    kit.status === 'generating' || kit.status === 'pending'
+  );
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -37,17 +56,39 @@ export default function DashboardPage() {
           </h1>
           <p className="text-text-secondary text-sm mt-1.5">
             {loading ? 'Loading...' : kits.length === 0 ? 'No kits yet' : `${kits.length} prep ${kits.length === 1 ? 'kit' : 'kits'}`}
+            {hasGeneratingKits && !loading && (
+              <span className="inline-flex items-center gap-1.5 ml-2 text-xs text-accent">
+                <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Auto-refreshing...
+              </span>
+            )}
           </p>
         </div>
-        <a 
-          href="/create" 
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent/90 active:bg-accent/80 transition-all duration-150 shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-          </svg>
-          New Kit
-        </a>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fetchKits()}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-raised transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh kits"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            Refresh
+          </button>
+          <a 
+            href="/create" 
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent/90 active:bg-accent/80 transition-all duration-150 shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+            </svg>
+            New Kit
+          </a>
+        </div>
       </div>
 
       {/* Content */}
