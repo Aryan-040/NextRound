@@ -10,11 +10,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 let isConnected = false;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Set CORS headers for all requests
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Get the origin from the request
+  const origin = req.headers.origin || req.headers.referer || '*';
+  
+  // Set CORS headers dynamically based on request origin
+  res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Handle preflight OPTIONS requests
   if (req.method === 'OPTIONS') {
