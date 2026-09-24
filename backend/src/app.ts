@@ -8,7 +8,6 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import authRouter from './routes/auth';
 import kitsRouter from './routes/kits';
@@ -19,10 +18,10 @@ const app: Application = express();
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use(helmet());
 
-// ── CORS — only allow requests from the configured frontend origin ─────────────
+// ── CORS — allow all origins ─────────────────────────────────────────────────
 app.use(
   cors({
-    origin: config.frontendUrl,
+    origin: true,
     credentials: true,
   }),
 );

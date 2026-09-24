@@ -12,9 +12,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
-    "paths": {
-      "@interview-prep/shared": ["../packages/shared/src/index.ts"]
-    }
+    "rootDir": "src"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
