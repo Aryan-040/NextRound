@@ -156,7 +156,9 @@ function makeKitDoc(ownerIdStr = USER_A_ID, overrides: Record<string, unknown> =
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('POST /api/kits', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('returns 400 when jobDescription is too short', async () => {
     const res = await supertest(app)
@@ -240,7 +242,9 @@ describe('POST /api/kits', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('GET /api/kits/:id', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('returns 200 with the kit document for the owner', async () => {
     mockFindById.mockResolvedValue(makeKitDoc(USER_A_ID));
@@ -279,7 +283,9 @@ describe('GET /api/kits/:id', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('PATCH /api/kits/:id', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('marks an edited question as pinned', async () => {
     const kitDoc = makeKitDoc(USER_A_ID);
@@ -357,7 +363,9 @@ describe('PATCH /api/kits/:id', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('DELETE /api/kits/:id', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('returns 204 and deletes kit + FlashcardProgress for the owner', async () => {
     mockFindById.mockResolvedValue(makeKitDoc(USER_A_ID));
@@ -400,7 +408,9 @@ describe('DELETE /api/kits/:id', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('DELETE /api/kits/:id/flashcards/:flashcardId', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('removes the flashcard and returns 204', async () => {
     const kitDoc = makeKitDoc(USER_A_ID);
@@ -443,7 +453,9 @@ describe('DELETE /api/kits/:id/flashcards/:flashcardId', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('DELETE /api/kits/:id/questions/:questionId', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('removes the question and returns 204', async () => {
     const kitDoc = makeKitDoc(USER_A_ID);

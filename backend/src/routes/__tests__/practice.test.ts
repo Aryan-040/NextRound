@@ -84,7 +84,9 @@ function makeKitWithFlashcards(ownerIdStr = USER_A_ID) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('GET /api/kits/:id/practice/deck', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('returns deck with all flashcard IDs when no prior ratings exist', async () => {
     mockFindById.mockReturnValue({
@@ -208,7 +210,9 @@ describe('GET /api/kits/:id/practice/deck', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('POST /api/kits/:id/practice/rate', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   function makeProgressDoc(confidences: number[]) {
     const ratings = confidences.map(c => ({ confidence: c, ratedAt: new Date() }));
