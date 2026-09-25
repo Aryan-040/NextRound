@@ -1,16 +1,37 @@
-# AI Interview Prep Kit
+# PrepKit - AI Interview Prep Kit
 
-> Paste a job description. Get a personalised interview prep kit in minutes.
+> Paste a job description. Get a personalized interview prep kit in minutes.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Aryan-040/PrepKit)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://prepkit-lilac.vercel.app)
 
 Given a job description, a company website URL, and the number of days until the interview, the system crawls the company's site, researches public interview-process discussions, then runs a sequential LLM pipeline to produce:
 
 - **Company brief** — what the company does, sourced from their own pages
-- **Role breakdown** — extracted requirements categorised as technical / behavioural / domain, each marked as must-have or nice-to-have
-- **Question bank** — categorised questions (technical, behavioural, system-design, company-fit) linked to specific requirements
+- **Role breakdown** — extracted requirements categorized as technical / behavioral / domain, each marked as must-have or nice-to-have
+- **Question bank** — categorized questions (technical, behavioral, system-design, company-fit) linked to specific requirements
 - **Flashcards** — front/back study cards linked to requirements
 - **Day-by-day schedule** — difficulty-ordered study plan for however many days you have
 
 Users can edit, reorder, add, delete, and regenerate any section inline without losing edits elsewhere. A Practice Mode provides confidence-tracked flashcard step-through. A CLI batch runner (`npm run evaluate`) executes the same pipeline programmatically for automated evaluation.
+
+---
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+- [Architecture](#architecture)
+- [Key Features](#key-features)
+- [LLM Provider](#llm-provider)
+- [Retrieval Approach](#retrieval-approach)
+- [Pipeline](#pipeline)
+- [Running Tests](#running-tests)
+- [Running the Batch CLI](#running-the-batch-cli)
+- [Practice Mode](#practice-mode)
+- [Known Limitations](#known-limitations)
+- [License](#license)
 
 ---
 
@@ -39,11 +60,11 @@ Users can edit, reorder, add, delete, and regenerate any section inline without 
 
 ## Prerequisites
 
-- **Node.js 18 or later** (the monorepo `engines` field enforces this)
+- **Node.js 18.x or later** (enforced by the monorepo `engines` field)
 - **MongoDB** — local (Community Edition) or [MongoDB Atlas](https://www.mongodb.com/atlas) free tier
-- **Google Gemini API key** (free) — obtain at https://aistudio.google.com/app/apikey
-  - Or a **Groq API key** — obtain at https://console.groq.com
-- Optionally a **SerpApi key** if you prefer reliable research results over the free DuckDuckGo scraper
+- **Google Gemini API key** (free) — get yours at https://aistudio.google.com/app/apikey
+- **Groq API key** (optional fallback) — get yours at https://console.groq.com
+- **SerpApi key** (optional) — for more reliable research results than the default DuckDuckGo scraper
 
 ---
 
@@ -52,29 +73,45 @@ Users can edit, reorder, add, delete, and regenerate any section inline without 
 ### 1. Clone and install
 
 ```bash
-git clone <repository-url>
-cd <repository-root>
+git clone https://github.com/Aryan-040/PrepKit.git
+cd PrepKit
 npm install
 ```
 
-This installs dependencies for the frontend and backend workspaces in one step.
+This installs dependencies for both frontend and backend workspaces.
 
 ### 2. Configure environment variables
+
+**Backend configuration:**
 
 ```bash
 cp .env.example backend/.env
 ```
 
-Edit `backend/.env` and fill in the required values:
+Edit `backend/.env` with your credentials:
 
 ```dotenv
+# MongoDB connection
 MONGODB_URI=mongodb://localhost:27017/interview-prep-kit
-JWT_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))">
+
+# JWT secret (generate with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))")
+JWT_SECRET=<your-generated-secret>
+
+# LLM Provider (gemini or groq)
 LLM_PROVIDER=gemini
-GEMINI_API_KEY=<your Gemini API key>
+
+# API Keys
+GEMINI_API_KEY=<your-gemini-api-key>
+GROQ_API_KEY=<your-groq-api-key-optional>
+
+# Optional: Research provider
+RESEARCH_PROVIDER=duckduckgo
+SERPAPI_KEY=<your-serpapi-key-optional>
 ```
 
-For the frontend, create `frontend/.env.local`:
+**Frontend configuration:**
+
+Create `frontend/.env.local`:
 
 ```dotenv
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
@@ -82,75 +119,83 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api
 
 ### 3. Run in development
 
-In two separate terminals:
+**Option 1: Run both together (recommended)**
 
 ```bash
-# Terminal 1 — backend API (http://localhost:4000)
+# Terminal 1 - Backend API (http://localhost:4000)
 npm run dev:backend
 
-# Terminal 2 — frontend (http://localhost:3000)
+# Terminal 2 - Frontend (http://localhost:3000)
 npm run dev:frontend
 ```
 
-The backend validates all required environment variables at startup and exits with a descriptive error if any are missing — check the terminal output if the server does not start.
+**Option 2: Run from workspace root**
 
-### 4. Production deployment
+```bash
+# Run backend
+npm run dev --workspace=backend
 
-The application is designed to deploy as a unified full-stack application on **Vercel**:
-
-- **Frontend**: Next.js App Router deployed as a standard Vercel Next.js project
-- **Backend**: Express API deployed as Vercel serverless functions via `backend/api/index.ts`
-- **Routing**: `vercel.json` routes `/api/*` requests to the backend serverless function, all other requests to the Next.js frontend
-
-#### Vercel Configuration
-
-The `vercel.json` at the project root defines:
-
-```json
-{
-  "version": 2,
-  "builds": [
-    { "src": "backend/api/index.ts", "use": "@vercel/node" },
-    { "src": "frontend/package.json", "use": "@vercel/next" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "backend/api/index.ts" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "frontend/$1" }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "/api"
-  }
-}
+# Run frontend (in another terminal)
+npm run dev --workspace=frontend
 ```
 
-This unified deployment means:
-- All API requests go to the same domain (no CORS issues)
-- Single Vercel project for both frontend and backend
-- Environment variables are managed through the Vercel dashboard
+The backend validates all required environment variables at startup. Check the terminal output if the server doesn't start.
 
-#### Environment Variables for Production
+### 4. Production deployment on Vercel
 
-Configure these in the Vercel dashboard under **Settings → Environment Variables**:
+The application is configured for unified full-stack deployment on **Vercel**:
 
-**Required:**
-```dotenv
-MONGODB_URI=<your MongoDB Atlas connection string>
-JWT_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))">
-LLM_PROVIDER=gemini
-GEMINI_API_KEY=<your Gemini API key>
-NODE_ENV=production
-```
+- **Frontend**: Next.js App Router (static + SSR)
+- **Backend**: Express API as serverless functions via `backend/api/index.ts`
+- **Routing**: All `/api/*` requests route to the backend; other requests go to Next.js
 
-**Optional:**
-```dotenv
-GROQ_API_KEY=<your Groq API key>  # if using LLM_PROVIDER=groq
-SERPAPI_KEY=<your SerpApi key>    # if using RESEARCH_PROVIDER=serpapi
-```
+#### Deploy to Vercel
 
-The frontend automatically uses `/api` as the API URL in production (configured via `vercel.json` env).
+1. **Push to GitHub**:
+   ```bash
+   git push origin main
+   ```
 
-> **Note:** SSRF IP-range blocking (RFC 1918, loopback, link-local) is enabled only when `NODE_ENV=production`.
+2. **Import project in Vercel**:
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Add New Project"
+   - Import your GitHub repository
+   - Vercel auto-detects the Next.js configuration
+
+3. **Configure environment variables** in Vercel dashboard (Settings → Environment Variables):
+
+   **Required:**
+   ```
+   MONGODB_URI=<your-mongodb-atlas-connection-string>
+   JWT_SECRET=<generate-secure-secret>
+   LLM_PROVIDER=gemini
+   GEMINI_API_KEY=<your-api-key>
+   NODE_ENV=production
+   ```
+
+   **Optional:**
+   ```
+   GROQ_API_KEY=<groq-key>
+   SERPAPI_KEY=<serpapi-key>
+   RESEARCH_PROVIDER=duckduckgo
+   ```
+
+4. **Deploy**: Vercel automatically builds and deploys on every push to main
+
+#### How it works
+
+The `vercel.json` configuration:
+- Routes `/api/*` to `backend/api/index.ts` (serverless function)
+- Routes everything else to the Next.js frontend
+- Sets `NEXT_PUBLIC_API_URL=/api` automatically in production
+
+This means:
+- ✅ No CORS issues (same-origin requests)
+- ✅ Single domain for frontend + backend
+- ✅ Automatic SSL/HTTPS
+- ✅ Serverless scaling
+
+> **Note:** SSRF IP-range blocking (RFC 1918, loopback, link-local) is only enabled when `NODE_ENV=production`.
 
 ---
 
@@ -221,68 +266,121 @@ The batch runner processes cases sequentially. Five cases complete within 15 min
 
 ## Architecture
 
-### Shared Package Structure
+### Project Structure
 
-The shared types, validators, and serializers that define the Kit schema are located in `backend/src/shared/`. While the project uses npm workspaces, the shared code is **inlined directly into the backend source tree** rather than maintained as a separate workspace package.
-
-**Why inlined?** Vercel's serverless function build system cannot reliably resolve npm workspace dependencies (`@interview-prep/shared`) at runtime. By placing shared code directly in `backend/src/shared/`, it compiles as part of the standard backend TypeScript build and deploys without dependency resolution issues.
-
-The frontend does not import these types — it interacts with the backend solely through REST/SSE APIs with runtime validation, keeping the frontend loosely coupled to backend data structures.
-
-### Monorepo structure
+The project uses **npm workspaces** with two main packages:
 
 ```
-/
-├── frontend/               # Next.js 14 (App Router) — TypeScript
+PrepKit/
+├── frontend/                # Next.js 14 (App Router) + TypeScript
 │   ├── app/
-│   │   ├── (auth)/         # Login, register — unauthenticated layout
-│   │   └── (app)/          # Authenticated layout with sidebar
-│   │       ├── dashboard/
-│   │       ├── create/
-│   │       └── kits/[id]/
-│   │           └── practice/
+│   │   ├── (auth)/         # Unauthenticated routes (login, register)
+│   │   │   ├── login/
+│   │   │   ├── register/
+│   │   │   └── layout.tsx
+│   │   ├── (app)/          # Authenticated routes with sidebar
+│   │   │   ├── dashboard/
+│   │   │   ├── create/
+│   │   │   └── kits/[id]/
+│   │   │       ├── page.tsx       # Kit builder
+│   │   │       └── practice/      # Practice mode
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx        # Landing page
 │   ├── components/
-│   │   ├── ui/             # Button, Input, Badge, Spinner primitives
+│   │   ├── ui/             # Primitives: Button, Input, Badge, Spinner, etc.
+│   │   ├── auth/           # AuthForm, LandingPage
 │   │   ├── builder/        # KitBuilder, QuestionCard, FlashcardCard, etc.
-│   │   ├── practice/       # PracticeMode, FlashcardViewer, ConfidenceRater
 │   │   ├── create/         # CreateForm, BatchUpload, ProgressTracker
+│   │   ├── practice/       # PracticeMode, FlashcardViewer, ConfidenceRater
 │   │   └── layout/         # AppShell, Sidebar, AuthGuard
-│   └── lib/
-│       ├── api.ts           # Typed fetch wrappers (attaches JWT)
-│       ├── auth.ts          # localStorage JWT helpers
-│       └── sse.ts           # useSSEProgress hook (EventSource)
+│   ├── lib/
+│   │   ├── api.ts          # Typed fetch wrappers (attaches JWT)
+│   │   ├── auth.ts         # localStorage JWT helpers
+│   │   └── sse.ts          # useSSEProgress hook (EventSource)
+│   ├── .env.local          # Local: NEXT_PUBLIC_API_URL
+│   └── .env.production     # Production: auto-set by Vercel
 │
-└── backend/                # Express 4 + TypeScript
-    ├── api/
-    │   └── index.ts        # Vercel serverless entry point
-    └── src/
-        ├── routes/          # auth.ts, kits.ts, practice.ts
-        ├── middleware/      # authenticate, ssrfGuard, sanitise, errorHandler
-        ├── services/        # crawler, researchAgent, extractionPipeline,
-        │                    # coverageChecker, scheduler, llmClient
-        ├── models/          # User, Kit, FlashcardProgress (Mongoose)
-        ├── shared/          # Inlined shared types and validators
-        │   ├── types.ts     # Kit, Requirement, Question, Flashcard, etc.
-        │   ├── validator.ts # validateKit(obj) → Kit | ValidationError
-        │   ├── serialiser.ts # serialiseKit(kit) → string
-        │   └── index.ts     # Public API exports
-        └── scripts/
-            └── evaluate.ts  # CLI batch runner
+├── backend/                # Express 4 + TypeScript
+│   ├── api/
+│   │   └── index.ts        # Vercel serverless entry point
+│   ├── src/
+│   │   ├── app.ts          # Express app setup
+│   │   ├── server.ts       # HTTP server (dev mode)
+│   │   ├── config.ts       # Environment validation
+│   │   ├── db.ts           # MongoDB connection
+│   │   ├── errors.ts       # Custom error classes
+│   │   ├── events.ts       # SSE event emitter
+│   │   ├── routes/
+│   │   │   ├── auth.ts     # POST /register, /login
+│   │   │   ├── kits.ts     # CRUD, regeneration, SSE progress
+│   │   │   └── practice.ts # GET /deck, POST /rate
+│   │   ├── middleware/
+│   │   │   ├── authenticate.ts   # JWT verification
+│   │   │   ├── errorHandler.ts   # Global error handler
+│   │   │   ├── sanitise.ts       # XSS prevention
+│   │   │   └── ssrfGuard.ts      # SSRF protection
+│   │   ├── services/
+│   │   │   ├── crawler.ts              # BFS web crawler
+│   │   │   ├── researchAgent.ts        # Interview research
+│   │   │   ├── extractionPipeline.ts   # Main pipeline orchestrator
+│   │   │   ├── coverageChecker.ts      # Requirement coverage
+│   │   │   ├── scheduler.ts            # Study schedule builder
+│   │   │   ├── llmClient.ts            # LLM abstraction
+│   │   │   └── llmAdapters/
+│   │   │       ├── gemini.ts
+│   │   │       └── groq.ts
+│   │   ├── models/
+│   │   │   ├── User.ts
+│   │   │   ├── Kit.ts
+│   │   │   └── FlashcardProgress.ts
+│   │   ├── shared/           # **Inlined shared types** (not workspace)
+│   │   │   ├── types.ts      # Kit, Requirement, Question, Flashcard
+│   │   │   ├── validator.ts  # validateKit() with Zod
+│   │   │   ├── serialiser.ts # JSON serialization
+│   │   │   └── index.ts
+│   │   ├── scripts/
+│   │   │   └── evaluate.ts   # CLI batch runner
+│   │   └── types/
+│   │       └── express.d.ts  # Type augmentations
+│   ├── .env                  # Local: MONGODB_URI, JWT_SECRET, etc.
+│   └── vitest.config.ts
+│
+├── vercel.json              # Unified Vercel deployment config
+├── package.json             # Root workspace config
+└── README.md
 ```
 
-### Request flow
+### Why shared types are inlined
+
+The shared types, validators, and serializers are in `backend/src/shared/` **instead of a separate workspace package** because:
+
+- **Vercel serverless compatibility**: npm workspace dependencies (`@interview-prep/shared`) don't resolve reliably in Vercel's serverless build
+- **Simpler deployment**: No workspace linking issues or build-time dependency resolution
+- **Frontend doesn't need them**: Frontend uses REST/SSE APIs with runtime validation, staying loosely coupled
+
+### Request Flow
 
 ```
-Browser → Next.js (RSC / client component)
-       → REST API  (Bearer JWT) → Express
-                                 → CrawlerService → external websites
-                                 → ResearchAgent  → search APIs
-                                 → ExtractionPipeline → LLM
-                                 → CoverageChecker (deterministic)
-                                 → Scheduler (deterministic)
-                                 → validateKit (backend/src/shared)
-                                 → MongoDB (Mongoose)
-       ← SSE stream (pipeline progress)
+User → Browser
+  ↓
+Next.js (SSR/Client Components)
+  ↓
+REST API (Bearer JWT in Authorization header)
+  ↓
+Express Middleware (authenticate → ssrfGuard → sanitise)
+  ↓
+Route Handlers (auth, kits, practice)
+  ↓
+Services (crawler, research, pipeline, coverage, scheduler)
+  ↓
+LLM Adapters (Gemini/Groq) → External APIs
+  ↓
+MongoDB (Mongoose Models: User, Kit, FlashcardProgress)
+  ↓
+Response (JSON or SSE stream)
+  ↓
+Browser (display/update UI)
 ```
 
 ---
@@ -442,14 +540,25 @@ Sessions expire after 24 hours; users re-authenticate. This is a deliberate scop
 ## Running Tests
 
 ```bash
-# Run all test suites
+# Run all tests (both workspaces)
 npm test
 
 # Run only backend tests
 npm test --workspace=backend
+
+# Run backend tests with coverage
+npm run test --workspace=backend -- --coverage
+
+# Type-check frontend
+npm run type-check --workspace=frontend
+
+# Type-check backend
+npm run type-check --workspace=backend
 ```
 
-Tests are run with Vitest. The backend test suite covers:
+### Test Coverage
+
+The backend test suite (Vitest) covers:
 
 | File | What is tested |
 |---|---|
@@ -508,7 +617,53 @@ The panel is collapsed by default to avoid visual clutter but is always availabl
 
 ---
 
-MIT
+## Key Features
+
+### 1. Intelligent Content Extraction Pipeline
+
+The system processes job descriptions through a multi-stage LLM pipeline:
+
+- **Requirements Extraction**: Identifies technical, behavioral, and domain requirements
+- **Company Brief Generation**: Creates summary from crawled company pages
+- **Question Bank Generation**: Creates categorized interview questions
+- **Flashcard Generation**: Produces study cards linked to requirements
+- **Coverage Analysis**: Ensures all must-have requirements are addressed
+- **Study Schedule**: Builds a day-by-day plan with difficulty-based ordering
+
+### 2. Web Crawling & Research
+
+- **Smart BFS Crawler**: Prioritizes relevant pages (careers, about, engineering blog)
+- **Interview Research**: Searches Glassdoor, Reddit, Blind for real interview experiences
+- **SSRF Protection**: Blocks requests to private/internal IP ranges in production
+- **Robots.txt Compliance**: Respects website crawling policies
+- **Rate Limiting**: Prevents overwhelming target servers
+
+### 3. Real-time Progress Tracking
+
+- **Server-Sent Events (SSE)**: Live pipeline progress updates
+- **Named Stages**: Shows each step (crawl, research, extraction, etc.)
+- **Error Handling**: Graceful failure with specific error messages
+
+### 4. Interactive Kit Builder
+
+- **Drag-and-Drop Reordering**: Powered by @dnd-kit
+- **Inline Editing**: Edit questions, flashcards, and briefs without regeneration
+- **Pin System**: Lock edited content to survive regeneration
+- **Selective Regeneration**: Regenerate specific sections without losing edits elsewhere
+
+### 5. Practice Mode
+
+- **Confidence-Based Ordering**: Shows hardest cards first
+- **Progress Tracking**: Remembers ratings across sessions
+- **Session Summary**: Shows performance stats after each session
+
+### 6. Duplicate Detection
+
+- **Smart Deduplication**: SHA-256 hash of job description + company URL
+- **User Choice**: Open existing kit or force create a new one
+- **409 Conflict Handling**: Clean UI modal for duplicate scenarios
+
+---
 
 ## License
 
