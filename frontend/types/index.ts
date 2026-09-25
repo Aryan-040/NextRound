@@ -1,5 +1,5 @@
 /**
- * Re-exports all shared types from @interview-prep/shared.
+ * Re-exports all shared types for frontend components.
  *
  * Frontend components should import types from here rather than directly
  * from the shared package, keeping the import path short and consistent:
@@ -15,8 +15,8 @@ export type {
   KitDocument,
   RatingEntry,
   FlashcardProgressDocument,
-  FieldError,
-  ValidationError,
-} from '@interview-prep/shared';
+} from './shared/types';
 
-export { validateKit, isValidationError, serialiseKit } from '@interview-prep/shared';
+export type { FieldError, ValidationError } from './shared/validator';
+export { validateKit, isValidationError } from './shared/validator';
+export { serialiseKit } from './shared/serialiser';
