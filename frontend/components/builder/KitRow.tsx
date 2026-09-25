@@ -157,13 +157,22 @@ export function KitRow({ kit, onDelete, isDeleting = false }: KitRowProps) {
 
         {/* Actions */}
         <div className="shrink-0 flex items-center gap-2">
-          <Link 
-            href={`/kits/${kit._id}`} 
-            aria-label={`Open kit: ${title}`}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium bg-bg-raised text-text-primary border border-bg-raised hover:border-accent hover:text-accent transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          >
-            Open
-          </Link>
+          {kit._id ? (
+            <Link 
+              href={`/kits/${kit._id}`} 
+              aria-label={`Open kit: ${title}`}
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium bg-bg-raised text-text-primary border border-bg-raised hover:border-accent hover:text-accent transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              Open
+            </Link>
+          ) : (
+            <button
+              disabled
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium bg-bg-raised text-text-secondary border border-bg-raised opacity-50 cursor-not-allowed"
+            >
+              Open
+            </button>
+          )}
           <button
             onClick={() => setShowConfirm(true)}
             aria-label={`Delete kit: ${title}`}
