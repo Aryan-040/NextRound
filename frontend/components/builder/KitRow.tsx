@@ -82,8 +82,8 @@ function ConfirmDeleteDialog({
 
 export function KitRow({ kit, onDelete, isDeleting = false }: KitRowProps) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const title = kit.source.role || 'Untitled role';
-  const company = kit.source.company || 'Unknown company';
+  const title = (kit.source && kit.source.role) ? kit.source.role : 'Untitled role';
+  const company = (kit.source && kit.source.company) ? kit.source.company : 'Unknown company';
   const totalHours = kit.totalMinutes && kit.totalMinutes > 0 
     ? (kit.totalMinutes / 60).toFixed(1) + 'h' 
     : null;

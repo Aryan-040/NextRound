@@ -380,7 +380,7 @@ router.get(
       const kits = kitsRaw.map((k: any) => ({
         _id: k._id,
         status: k.status,
-        source: k.source,
+        source: k.source || { role: '', company: '', company_url: '' },
         createdAt: k.createdAt,
         questionCount: Array.isArray(k.questions) ? k.questions.length : undefined,
         flashcardCount: Array.isArray(k.flashcards) ? k.flashcards.length : undefined,

@@ -147,6 +147,12 @@ export default function KitPage() {
   if (!kit) return null;
   const { status, source, company_brief } = kit;
 
+  // Safety check: ensure nested objects exist before rendering sections
+  const hasSource = source && typeof source === 'object';
+  const hasCompanyBrief = company_brief && typeof company_brief === 'object';
+  const hasRole = kit.role && typeof kit.role === 'object';
+  const canRenderSections = (status === 'ready' || status === 'failed' || status === 'generating') && hasCompanyBrief;
+
   return (
     <>
       {/* Full pipeline overlay — initial kit generation ONLY */}
@@ -159,11 +165,11 @@ export default function KitPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="font-sans text-2xl font-bold text-text-primary">
-                {source.role || 'Interview Prep Kit'}
+                {hasSource && source.role ? source.role : 'Interview Prep Kit'}
               </h1>
               <p className="text-text-secondary text-sm mt-1.5">
-                {source.company}
-                {source.company_url && (
+                {hasSource && source.company ? source.company : 'Loading...'}
+                {hasSource && source.company_url && (
                   <>
                     {' · '}
                     <a href={source.company_url} target="_blank" rel="noopener noreferrer"
@@ -203,10 +209,10 @@ export default function KitPage() {
         )}
 
         {/* Builder sections — isRegenerating scopes the loading state to each card */}
-        {(status === 'ready' || status === 'failed' || status === 'generating') && company_brief && (
+        {canRenderSections && (
           <>
             {/* Requirements & Coverage panel — collapsed by default, always visible */}
-            {(kit.role?.requirements?.length ?? 0) > 0 && (
+            {hasRole && (kit.role.requirements?.length ?? 0) > 0 && (
               <RequirementsPanel
                 requirements={kit.role.requirements}
                 uncoveredRequirementIds={kit.coverage?.uncovered_requirement_ids ?? []}
