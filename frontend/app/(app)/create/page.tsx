@@ -38,7 +38,6 @@ export default function CreatePage() {
   // Redirect to the kit builder when pipeline finishes.
   useEffect(() => {
     if (status === 'complete' && kitId) {
-      console.log('[CreatePage] Pipeline complete, redirecting to kit:', kitId);
       const timer = setTimeout(() => {
         router.push(`/kits/${kitId}`);
       }, 800);
@@ -47,7 +46,6 @@ export default function CreatePage() {
   }, [status, kitId, router]);
 
   const handleKitCreated = (newKitId: string) => {
-    console.log('[CreatePage] handleKitCreated called with:', newKitId);
     if (!newKitId) {
       console.error('[CreatePage] Kit ID is undefined or empty!');
       return;
