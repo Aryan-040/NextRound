@@ -111,8 +111,8 @@ export function useSSEProgress(kitId: string | null): SSEProgressState {
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    if (!kitId) {
-      // Reset to idle when no kit is selected.
+    if (!kitId || kitId === 'undefined' || kitId.trim() === '') {
+      // Reset to idle when no kit is selected or kitId is invalid.
       setStages({});
       setStatus('idle');
       setError(null);
@@ -120,9 +120,21 @@ export function useSSEProgress(kitId: string | null): SSEProgressState {
     }
 
     const token = getToken();
-    const url = new URL(
-      `${API_BASE}/kits/${encodeURIComponent(kitId)}/progress`
-    );
+    
+    // Build the progress endpoint URL.
+    // If API_BASE is relative (e.g., '/api'), we need to create an absolute URL
+    // by prepending the current origin in the browser.
+    let progressUrl: string;
+    if (API_BASE.startsWith('http://') || API_BASE.startsWith('https://')) {
+      // API_BASE is already absolute
+      progressUrl = `${API_BASE}/kits/${encodeURIComponent(kitId)}/progress`;
+    } else {
+      // API_BASE is relative (e.g., '/api'), make it absolute
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      progressUrl = `${origin}${API_BASE}/kits/${encodeURIComponent(kitId)}/progress`;
+    }
+    
+    const url = new URL(progressUrl);
     if (token) {
       url.searchParams.set('token', token);
     }
