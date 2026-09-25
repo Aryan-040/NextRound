@@ -193,6 +193,12 @@ export function CreateForm({ onKitCreated }: CreateFormProps) {
         method: 'POST',
         body: forceCreate ? { ...payload, forceCreate: true } : payload,
       });
+      
+      // Debug logging
+      if (!res.kitId) {
+        console.error('[CreateForm] API response missing kitId:', res);
+      }
+      
       onKitCreated(res.kitId);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -248,6 +254,12 @@ export function CreateForm({ onKitCreated }: CreateFormProps) {
         method: 'POST',
         body: { ...pendingPayload, forceCreate: true },
       });
+      
+      // Debug logging
+      if (!res.kitId) {
+        console.error('[CreateForm handleCreateNew] API response missing kitId:', res);
+      }
+      
       onKitCreated(res.kitId);
     } catch (err) {
       setServerError(
